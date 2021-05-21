@@ -160,7 +160,7 @@ if(typ=='e'){x=x1;y=y1;id=id1;typ=typ1;xend=x2;yend=y2; return 0;}
 
 if(lewo==NULL)
 {
-  if(x>x1||(x==x1&&y>=y1)  )//wlewo
+  if(x>x1||(x==x1&&y>y1)  )//wlewo
         {lewo= new treeavlA(x1,y1,id1,id2,typ1,x2,y2); high++;return 1;}
   else{
     if(prawo!=NULL)
@@ -173,7 +173,7 @@ if(lewo==NULL)
   }
 }
 else{
- if(x> x1|| (x==x1&&y>=y1) ){stop=lewo->add(x1,y1,id1,id2,typ1,x2,y2);}
+ if(x> x1|| (x==x1&&y>y1) ){stop=lewo->add(x1,y1,id1,id2,typ1,x2,y2);}
 else {if(prawo==NULL){prawo=new treeavlA(x1,y1,id1,id2,typ1,x2,y2);}
 else stop=prawo->add(x1,y1,id1,id2,typ1,x2,y2);}
 }
@@ -261,8 +261,8 @@ int id;
 double y;
 double x;
 
-double y2;
-double x2;
+double yend;
+double xend;
 
 
 treeavlB *lewo;
@@ -279,8 +279,6 @@ cout << y ;
 cout << " " ;
 cout << id;
 cout << " " ;
-cout << typ ;
-cout << " " ;
 cout << xend;
 cout << " " ;
 cout << yend <<endl;
@@ -290,18 +288,17 @@ cout << yend <<endl;
 
 
 treeavlB()//puste drzewo
-{typ='e';
+{id=-1;
 }
 
-treeavlB(double x1,double y1,int id1,int id2,char typ1,double x2,double y2)//leaf
+treeavlB(double x1,double y1,int id1,double x2,double y2)//leaf
 {
 x=x1;
 y=y1;
 xend=x2;
 yend=y2;
-typ=typ1;
 id=id1;
-id2=id2;
+
 
 high=1;
 lewo=NULL;
@@ -326,17 +323,11 @@ temp =yend;
 yend=lewo->yend;
 lewo->yend=temp;
 
-char temp2 =typ;
-typ=lewo->typ;
-lewo->typ=temp2;
 
 int temp3=id;
 id=lewo->id;
 lewo->id=temp3;
 
- temp3=id2;
-id2=lewo->id2;
-lewo->id2=temp3;
 
 
 treeavlB *pom= prawo;
@@ -371,17 +362,10 @@ temp =y;
 y=prawo->y;
 prawo->y=temp;
 
-char temp2 =typ;
-typ=prawo->typ;
-prawo->typ=temp2;
-
 int temp3=id;
 id=prawo->id;
 prawo->id=temp3;
 
-temp3=id2;
-id2=prawo->id2;
-prawo->id2=temp3;
 
 
 treeavlB *pom= lewo;
@@ -400,29 +384,29 @@ high=max(lewo==NULL?0:lewo->high,prawo==NULL?0:prawo->high) +1;
 }
 
 
-bool add(double x1,double y1,int id1,int id2,char typ1,double x2,double y2)
+bool add(double x1,double y1,int id1,double x2,double y2)
 {bool stop=1;
 
-if(typ=='e'){x=x1;y=y1;id=id1;typ=typ1;xend=x2;yend=y2; return 0;}
-
+if(id==-1){x=x1;y=y1;id=id1;xend=x2;yend=y2; return 0;}
+int ypor= (y-yend)*x/(x-xend)+  (x*yend-xend*y)/(x-xend);
 if(lewo==NULL)
 {
-  if(x>x1||(x==x1&&y>=y1)  )//wlewo
-        {lewo= new treeavlB(x1,y1,id1,id2,typ1,x2,y2); high++;return 1;}
+  if(y< ypor)//wlewo
+        {lewo= new treeavlB(x1,y1,id1,x2,y2); high++;return 1;}
   else{
     if(prawo!=NULL)
-        stop=prawo->add(x1,y1,id1,id2,typ1,x2,y2);
+        stop=prawo->add(x1,y1,id1,x2,y2);
     else{
-        prawo= new treeavlB(x1,y1,id1,id2,typ1,x2,y2); high++;
+        prawo= new treeavlB(x1,y1,id1,x2,y2); high++;
 
         return 1;
     }
   }
 }
 else{
- if(x> x1|| (x==x1&&y>=y1) ){stop=lewo->add(x1,y1,id1,id2,typ1,x2,y2);}
-else {if(prawo==NULL){prawo=new treeavlB(x1,y1,id1,id2,typ1,x2,y2);}
-else stop=prawo->add(x1,y1,id1,id2,typ1,x2,y2);}
+ if(y<ypor) {stop=lewo->add(x1,y1,id1,x2,y2);}
+else {if(prawo==NULL){prawo=new treeavlB(x1,y1,id1,x2,y2);}
+else stop=prawo->add(x1,y1,id1,x2,y2);}
 }
 
      if(stop)
@@ -458,11 +442,18 @@ return 0;
 }
 
 
-bool del()//pierwszy
-    {
-   if(lewo==NULL&&prawo==NULL){ return 1;}
-     else if(lewo==NULL){x=prawo->x; y=prawo->y; id=prawo->id; id2=prawo->id2; typ=prawo->typ; xend=prawo->xend;yend=prawo->yend; delete prawo; prawo=NULL;}
-    else{if(lewo->del()){delete lewo; lewo=NULL;}}
+bool del(double x1,double y1,int id1,double x2,double y2){//zdarzenia
+   if(lewo==NULL&&prawo==NULL){ if(id1==id)return 1;else{cout<<"nie ma takiego zdarzenia"<<endl;return 0;}}
+     else if(lewo==NULL){if(id==id1){x=prawo->x; y=prawo->y; id=prawo->id;  xend=prawo->xend;yend=prawo->yend; delete prawo; prawo=NULL;}else {   if(prawo->del(x1,y1,id1,x2,y2)){delete prawo;prawo=NULL;}} }
+    else if(prawo==NULL){if(id==id1){x=lewo->x; y=lewo->y; id=lewo->id;  xend=lewo->xend;yend=lewo->yend; delete lewo; lewo=NULL;}else {   if(lewo->del(x1,y1,id1,x2,y2) ){delete lewo;lewo=NULL;}}}
+    else{
+        int ypor= (y-yend)*x/(x-xend)+  (x*yend-xend*y)/(x-xend);
+        if(id=id1){treeavlB *TEMP= lewo->najwiekszy(this);}
+        else{
+            if(ypor>y)lewo->del(x1,y1,id1,x2,y2);
+            else prawo->del(x1,y1,id1,x2,y2);
+            }
+        }
 
 
       high=max(lewo==NULL?0:lewo->high,prawo==NULL?0:prawo->high) +1;
@@ -486,6 +477,57 @@ bool del()//pierwszy
 
  return 0;
     }
+
+
+     treeavlB* najwiekszy(treeavlB *cos)
+    {treeavlB ret;
+    bool oh=0;
+     if(prawo!=NULL)if(prawo->prawo==NULL&&prawo->lewo==NULL)oh=1;
+    if(prawo==NULL) {if(lewo!=NULL){ ret=val;
+                                    val=lewo->val;
+                                    high=lewo->high;
+                                    sizes= lewo->sizes;
+                                    delete lewo;
+                                    lewo=NULL;
+
+                                    return ret;
+                                    }else
+                                    {
+                                     ret=val;
+
+                                    return ret;
+                                    }
+
+                    }else { ret=prawo->najwiekszy();}
+
+         if(oh){delete prawo;prawo=NULL;}
+        high=max(lewo==NULL?0:lewo->high,prawo==NULL?0:prawo->high) +1;
+
+        long long int temp= (lewo==NULL?0:lewo->high)-(prawo==NULL?0:prawo->high);
+        if( abs(temp)>1)
+            {
+                if(temp>0)  {   //l
+                            if( (lewo->lewo==NULL?0:lewo->lewo->high)-(lewo->prawo==NULL?0:lewo->prawo->high)<0)lewo->Rrotation();
+                            Lrotation();
+                            }
+                            else
+                            {   //p
+                            if(( (prawo->lewo==NULL?0:prawo->lewo->high)
+                            -(prawo->prawo==NULL?0:prawo->prawo->high) )>0)
+                            prawo->Lrotation();
+                            Rrotation();
+                            }
+
+            }
+
+
+    return ret;
+    }
+
+
+
+
+
 
 
     treeavlB *take()//pierwszy
@@ -922,3 +964,4 @@ switch(operation)   {
 
 
 */
+
